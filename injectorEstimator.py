@@ -9,9 +9,9 @@ filePath = 'carData.csv'
 # Read .csv and store it as a DataFrame
 df = pd.read_csv(filePath)
 
-
 # Define the real total volume (last row of Vinj cum) 
-real_total_volume = 1.4843728644460117e-08  # Example value in liters (adjust as needed)
+real_total_volume = df['Vinj cum'].iloc[-1]  # Example value in liters (adjust as needed)
+print(f"real_total_volume: {real_total_volume}")
 
 # Vinj function
 def calc_vinj(Cd, df):
