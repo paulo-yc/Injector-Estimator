@@ -2,15 +2,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+import glob
 
-# Path to .csv
-filePath = 'carData.csv'
+# Path to multiples .csv
+filePaths = glob.glob('carData_*.csv')
 
-# Read .csv and store it as a DataFrame
-df = pd.read_csv(filePath)
+# Read multiples .csv and store it as a DataFrame list
+df_list = [pd.read_csv(file) for file in filePaths]
 
 # Define the real total volume (last row of Vinj cum)
-real_total_volume = df['Vinj cum'].iloc[-1]  # Example value in liters (adjust as needed)
+real_total_volume = df_list[0]['Vinj cum'].iloc[-1]  # Example value in liters (adjust as needed)
 print(f"real_total_volume: {real_total_volume}")
 
 # Vinj function
@@ -35,7 +36,7 @@ optimization_options = {
 }
 
 # Run the optimization
-result = minimize(objective, initial_params, args=(df, real_total_volume), 
+result = minimize(objective, initial_params, args=(df_list[0], real_total_volume), 
                   method='Nelder-Mead', options=optimization_options)
 
 # Optimal values of Cd and Pint
