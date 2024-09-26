@@ -32,10 +32,10 @@ def callback(params):
 dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 4)]
 
 # Get target volumes (the last value of 'Vinj cum' from each file)
-target_volumes = [df['Vinj cum'].iloc[-1] for df in dfs]
+target_volumes = [df['Tot Vol'].iloc[0] for df in dfs]
 
 # Initial guesses for Cd and Pint
-initial_guess = [0.1, 10]
+initial_guess = [0.1, 200]
 
 # Bounds for Cd and Pint
 bounds = [(0.01, 2), (0, 2000)]
