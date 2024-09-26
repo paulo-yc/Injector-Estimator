@@ -15,17 +15,18 @@ def carDataGen(num_rows, filename):
     # Experience data
     df['Tinj'] = np.random.randint(8, 15,size=num_rows)/10000
     df['Prail'] = np.random.randint(1000, 2000, size=num_rows)
-    df['Pint'] = 100 #vamos considerar constante por enquanto
-    df['Pdif'] = df['Prail'] - df['Pint']
-    df['Cd'] = 0.7
-    df['A'] = 0.000001
-    df['rho'] = 850 #kg/m3
-    df['Vinj'] = df['Cd'] * df['A'] * np.sqrt(2*df['Pdif'] / df['rho']) * df['Tinj']
-    df['Vinj cum'] = df['Vinj'].cumsum()
+
+    Pint = 230 #vamos considerar constante por enquanto
+    Pdif = df['Prail'] - Pint
+    Cd = 0.65
+    A = 1
+    rho = 850 #kg/m3
+    Vinj = Cd * A * (2*Pdif /rho) * df['Tinj']
+    df['Vinj cum'] = Vinj.cumsum()
 
     # Save to csv
     df.to_csv(filename, index=False)
 
-carDataGen(100,"carData_1.csv")
-carDataGen(100,"carData_2.csv")
-carDataGen(100,"carData_3.csv")
+carDataGen(1000,"carData_1.csv")
+carDataGen(1000,"carData_2.csv")
+carDataGen(1000,"carData_3.csv")
