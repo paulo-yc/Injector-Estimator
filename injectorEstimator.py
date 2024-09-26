@@ -1,58 +1,67 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-import glob
 
-# Path to multiples .csv
-filePaths = glob.glob('carData_*.csv')
+# Function to calculate Vinj cum based on given Cd and Pint for a DataFrame
+def calculate_Vinj_cum(Cd, Pint, df):
+    A = 1
+    rho = 850
+    Pdif = df['Prail'] - Pint
+    Vinj = Cd * A * (2 * Pdif / rho) * df['Tinj']
+    df['Vinj cum'] = Vinj.cumsum()
+    return df['Vinj cum'].iloc[-1]
 
-# Read multiples .csv and store it as a DataFrame list
-df_list = [pd.read_csv(file) for file in filePaths]
-
-# Define the real total volume (last row of Vinj cum)
-real_total_volume = df_list[0]['Vinj cum'].iloc[-1]  # Example value in liters (adjust as needed)
-print(f"real_total_volume: {real_total_volume}")
-
-# Vinj function
-def calc_vinj(params, df):
+# Objective function to minimize the difference for all datasets
+def objective(params, dataframes, target_volumes):
     Cd, Pint = params
-    return Cd * df['A'] * np.sqrt(2 * (df['Prail'] - Pint) / df['rho']) * df['Tinj']
+    total_error = 0
+    
+    # Loop over all dataframes to calculate total error
+    for i, df in enumerate(dataframes):
+        Vinj_cum_pred = calculate_Vinj_cum(Cd, Pint, df)
+        total_error += (Vinj_cum_pred - target_volumes[i]) ** 2  # Sum of squared errors
+    
+    return total_error
 
-# Objective function to minimize the difference between cumulative Vinj and the real total volume
-def objective(params, df, real_total_volume):
+# Callback function to print partial results during optimization
+def callback(params):
     Cd, Pint = params
-    df['Vinj'] = calc_vinj(params, df)
-    calculated_total_volume = df['Vinj'].cumsum().iloc[-1]  # Last row of cumulative Vinj
-    return abs(calculated_total_volume - real_total_volume)
+    print(f"Partial results - Cd: {Cd:.4f}, Pint: {Pint:.2f}")
 
-# Initial guess for Cd and Pint
-initial_params = [0.1, 80]  # Example initial guesses (adjust as needed)
+# Load all datasets
+dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 4)]
 
-optimization_options = {
-    'maxiter': 10000,  # Maximum number of iterations
-    'xatol': 1e-6,    # Tolerance for changes in parameters
-    'fatol': 1e-6,    # Tolerance in the value of the objective function
-}
+# Get target volumes (the last value of 'Vinj cum' from each file)
+target_volumes = [df['Vinj cum'].iloc[-1] for df in dfs]
 
-# Run the optimization
-result = minimize(objective, initial_params, args=(df_list[0], real_total_volume), 
-                  method='Nelder-Mead', options=optimization_options)
+# Initial guesses for Cd and Pint
+initial_guess = [0.1, 10]
 
-# Optimal values of Cd and Pint
-optimal_Cd, optimal_Pint = result.x
+# Bounds for Cd and Pint
+bounds = [(0.01, 2), (0, 2000)]
 
-# Display results
-print(f"Optimal value of Cd: {optimal_Cd:.5f}")
-print(f"Optimal value of Pint: {optimal_Pint:.5f}")
+# Print the initial objective value
+initial_objective_value = objective(initial_guess, dfs, target_volumes)
+print(f"Initial objective value: {initial_objective_value}")
 
-# Optional: Plot data
-# plt.figure(figsize=(10, 6))  # figure size
-# plt.plot(df.index, df['Vinj'], marker='o', label='Vinj')  
-# plt.plot(df.index, df['Vinj cum'], marker='o', label='Vinj cum')  
+# Perform optimization with tighter tolerances and callback for partial results
+result = minimize(
+    objective, 
+    initial_guess, 
+    args=(dfs, target_volumes), 
+    bounds=bounds, 
+    method='L-BFGS-B', 
+    callback=callback, 
+    options={
+        'disp': True,           # Display the optimization process
+        'maxiter': 1000,        # Maximum number of iterations
+        'ftol': 1e-20,          # Function tolerance for stopping
+        'gtol': 1e-12,          # Gradient tolerance for stopping
+    }
+)
 
-# plt.title('Vinj and Vinj cum')
-# plt.xlabel('Index')
-# plt.ylabel('Values')
-# plt.grid(True)  # Add a grid
-# plt.show()
+# Get the optimized Cd and Pint
+Cd_opt, Pint_opt = result.x
+
+# Display final results
+print(f"Optimized Cd: {Cd_opt:.4f}, Pint: {Pint_opt:.2f}")
