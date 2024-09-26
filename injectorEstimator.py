@@ -7,7 +7,7 @@ def calculate_Vinj_cum(Cd, Pint, df):
     A = 1
     rho = 850
     Pdif = df['Prail'] - Pint
-    Vinj = Cd * A * (2 * Pdif / rho) * df['Tinj']
+    Vinj = Cd * A * np.sqrt(2 * Pdif / rho) * df['Tinj']
     df['Vinj cum'] = Vinj.cumsum()
     return df['Vinj cum'].iloc[-1]
 

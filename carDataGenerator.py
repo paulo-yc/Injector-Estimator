@@ -21,7 +21,7 @@ def carDataGen(num_rows, filename):
     Cd = 0.65
     A = 1
     rho = 850 #kg/m3
-    Vinj = Cd * A * (2*Pdif /rho) * df['Tinj']
+    Vinj = Cd * A * np.sqrt(2*Pdif /rho) * df['Tinj']
     df['Vinj cum'] = Vinj.cumsum()
 
     # Save to csv
