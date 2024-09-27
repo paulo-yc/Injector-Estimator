@@ -85,23 +85,23 @@ def carDataGen_optimized(Cd,Pint,df):
     df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
 
     fig, axs = plt.subplots(2,1,figsize=(10,6))
-    axs[0].grid(True)
-    axs[1].grid(True)
-
-    axs[1].set_title("Estimated")
-    axs[1].plot(df['RPM'],label="RPM")
-    axs[1].plot(df['Tinj'],label="Tinj")
-    axs[1].plot(df['Prail'],label="Prail")
-    axs[1].plot(df['Vinj_cum'],label="Vinj_cum")
-    axs[1].legend()
-
     df2 = pd.read_csv("carData_1.csv")    
+    
     axs[0].set_title("Experimental data (.csv)")
     axs[0].plot(df2['RPM'],label="RPM")
     axs[0].plot(df2['Tinj'],label="Tinj")
     axs[0].plot(df2['Prail'],label="Prail")
     axs[0].plot(df2['Vinj_cum'],label="Vinj_cum")
-    axs[0].legend()
+    axs[0].legend()    
+    axs[0].grid(True)
+
+    axs[1].set_title("Estimated")
+    axs[1].plot(df['Vinj_cum'],label="Vinj_cum estimated")
+    axs[1].plot(df2['Vinj_cum'],label="Vinj_cum experimental")
+    axs[1].legend()
+    axs[1].grid(True)
+
+
 
     plt.tight_layout()
     plt.show()
