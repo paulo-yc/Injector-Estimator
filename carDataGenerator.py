@@ -4,6 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+Cd = 0.9
+Pint = 40 #bar
+
+A = 0.000001
+rho = 850 #kg/m3
+
 def stable_rpm(rpm_value, duration):
     return np.full(duration, rpm_value)
 
@@ -42,11 +48,8 @@ def carDataGen(num_rows, filename):
     df['Tinj'] = df['TinjA'] + df['TinjB'] # microsecond
     df['Prail'] = df['RPM'] * np.random.uniform(0.9, 1.1, size=num_rows)
 
-    Pint = 40 #bar
     Pdif = df['Prail'] - Pint
-    Cd = 0.95
-    A = 1
-    rho = 850 #kg/m3
+
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000
     df['Vinj_cum'] = Vinj.cumsum()
 

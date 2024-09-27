@@ -3,8 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-A = 1
-rho = 850
+#Cd = 0.95
+#Pint = 40 #bar
+A = 0.000001
+rho = 850 #kg/m3
 
 # Function to calculate Vinj cum based on given Cd and Pint for a DataFrame
 def calculate_Vinj_cum(Cd, Pint, df):
@@ -38,10 +40,10 @@ dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 6)]
 target_volumes = [df['Tot Vol'].iloc[0] for df in dfs]
 
 # Initial guesses for Cd and Pint
-initial_guess = [0.7, 45]
+initial_guess = [0.7, 500]
 
 # Bounds for Cd and Pint
-bounds = [(0.3, 1), (30, 60)]
+bounds = [(0.3, 10), (10, 500)]
 
 # Print the initial objective value
 initial_objective_value = objective(initial_guess, dfs, target_volumes)
@@ -73,20 +75,20 @@ print(f"Optimized Cd: {Cd_opt:.4f}, Pint: {Pint_opt:.2f}")
 
 
 
-def carDataGen_optimized(Cd,Pint,df):
+def carDataGen_estimated(Cd,Pint,df):
 
+    #Estimated
     Pdif = df['Prail'] - Pint
-    A = 1
-    rho = 850 #kg/m3
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000
     df['Vinj_cum'] = Vinj.cumsum()
+    #df['Tot Vol'] =None
+    #df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
 
-    df['Tot Vol'] =None
-    df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
+    #experimental
+    df2 = pd.read_csv("carData_1.csv") 
 
-    fig, axs = plt.subplots(2,1,figsize=(10,6))
-    df2 = pd.read_csv("carData_1.csv")    
-
+    #plot comparison
+    fig, axs = plt.subplots(2,1,figsize=(10,6))   
     axs[0].set_title("Experimental data (.csv)")
     axs[0].plot(df2['RPM'],label="RPM")
     axs[0].plot(df2['Tinj'],label="Tinj")
@@ -95,7 +97,7 @@ def carDataGen_optimized(Cd,Pint,df):
     axs[0].legend()    
     axs[0].grid(True)
 
-    axs[1].set_title("Estimated")
+    axs[1].set_title(f"Estimated - Cd:{Cd:.5f} - Pint{Pint:.5f}")
     axs[1].plot(df['Vinj_cum'],label="Vinj_cum estimated")
     axs[1].plot(df2['Vinj_cum'],label="Vinj_cum experimental")
     axs[1].legend()
@@ -108,7 +110,11 @@ def carDataGen_optimized(Cd,Pint,df):
 
 
 
-carDataGen_optimized(Cd_opt,Pint_opt,dfs[0])
+carDataGen_estimated(Cd_opt,Pint_opt,dfs[0])
+carDataGen_estimated(Cd_opt,40,dfs[0])
+carDataGen_estimated(Cd_opt,400,dfs[0])
+carDataGen_estimated(Cd_opt,30,dfs[0])
+carDataGen_estimated(Cd_opt,0,dfs[0])
 # carDataGen_optimized(Cd_opt,Pint_opt,dfs[1])
 # carDataGen_optimized(Cd_opt,Pint_opt,dfs[2])
 # carDataGen_optimized(Cd_opt,Pint_opt,dfs[3])
