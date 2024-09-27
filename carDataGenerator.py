@@ -11,9 +11,11 @@ def changing_rpm(start_rpm, end_rpm, duration):
     return np.linspace(start_rpm, end_rpm, duration)
 
 # RPM values and intervals
-total_time = 600  # Total seconds
-intervals = [60, 120, 90, 150, 80, 100] 
-rpm_values = [1000, 2000, 1500, 2500, 1800, 1000] 
+time_scale = 1
+intervals = np.array([60, 120, 90, 150, 80, 100, 50])
+intervals = intervals*time_scale
+rpm_values = [1000, 2000, 1500, 2500, 1800, 1300,1000] 
+total_time = sum(intervals) # Total seconds
 
 # RPM variation
 rpm_data = np.array([])
@@ -40,9 +42,9 @@ def carDataGen(num_rows, filename):
     df['Tinj'] = df['TinjA'] + df['TinjB'] # microsecond
     df['Prail'] = df['RPM'] * np.random.uniform(0.9, 1.1, size=num_rows)
 
-    Pint = 60 #bar
+    Pint = 40 #bar
     Pdif = df['Prail'] - Pint
-    Cd = 0.8
+    Cd = 0.95
     A = 1
     rho = 850 #kg/m3
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000

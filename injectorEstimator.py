@@ -86,12 +86,12 @@ def carDataGen_optimized(Cd,Pint,df):
 
     fig, axs = plt.subplots(2,1,figsize=(10,6))
     df2 = pd.read_csv("carData_1.csv")    
-    
+
     axs[0].set_title("Experimental data (.csv)")
     axs[0].plot(df2['RPM'],label="RPM")
     axs[0].plot(df2['Tinj'],label="Tinj")
     axs[0].plot(df2['Prail'],label="Prail")
-    axs[0].plot(df2['Vinj_cum'],label="Vinj_cum")
+    #axs[0].plot(df2['Vinj_cum'],label="Vinj_cum")
     axs[0].legend()    
     axs[0].grid(True)
 
@@ -109,6 +109,9 @@ def carDataGen_optimized(Cd,Pint,df):
 
 
 carDataGen_optimized(Cd_opt,Pint_opt,dfs[0])
+# carDataGen_optimized(Cd_opt,Pint_opt,dfs[1])
+# carDataGen_optimized(Cd_opt,Pint_opt,dfs[2])
+# carDataGen_optimized(Cd_opt,Pint_opt,dfs[3])
 #carDataGen_optimized(0.47,60,dfs[0])
 
 
