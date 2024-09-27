@@ -42,7 +42,7 @@ def carDataGen(num_rows, filename):
 
     Pint = 60 #bar
     Pdif = df['Prail'] - Pint
-    Cd = 0.47
+    Cd = 0.8
     A = 1
     rho = 850 #kg/m3
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000

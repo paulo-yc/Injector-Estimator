@@ -38,10 +38,10 @@ dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 6)]
 target_volumes = [df['Tot Vol'].iloc[0] for df in dfs]
 
 # Initial guesses for Cd and Pint
-initial_guess = [0.1, 0.1]
+initial_guess = [0.7, 45]
 
 # Bounds for Cd and Pint
-bounds = [(0.01, 100), (30, 60)]
+bounds = [(0.3, 1), (30, 60)]
 
 # Print the initial objective value
 initial_objective_value = objective(initial_guess, dfs, target_volumes)
@@ -106,7 +106,7 @@ def carDataGen_optimized(Cd,Pint,df):
 
 
 
-#carDataGen_optimized(Cd_opt,Pint_opt,dfs[0])
-carDataGen_optimized(0.47,60,dfs[0])
+carDataGen_optimized(Cd_opt,Pint_opt,dfs[0])
+#carDataGen_optimized(0.47,60,dfs[0])
 
 
