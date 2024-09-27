@@ -10,21 +10,20 @@ rho = 850 #kg/m3
 
 # Function to calculate Vinj cum based on given Cd and Pint for a DataFrame
 def calculate_Vinj_cum(Cd, Pint, df):
-
     Pdif = df['Prail'] - Pint
     Vinj = Cd * A * np.sqrt(2 * Pdif*100000 / rho) * df['Tinj']/1000000
     df['Vinj cum'] = Vinj.cumsum()
     return df['Vinj cum'].iloc[-1]
 
 # Objective function to minimize the difference for all datasets
-def objective(params, dataframes, target_volumes):
+def objective(params, df, target_vols):
     Cd, Pint = params
     total_error = 0
     
     # Loop over all dataframes to calculate total error
-    for i, df in enumerate(dataframes):
+    for i in range(len(target_vols)):
         Vinj_cum_pred = calculate_Vinj_cum(Cd, Pint, df)
-        total_error += (Vinj_cum_pred - target_volumes[i]) ** 2  # Sum of squared errors
+        total_error += (Vinj_cum_pred - target_vols[i]) ** 2  # Sum of squared errors
     
     return total_error
 
@@ -35,9 +34,19 @@ def callback(params):
 
 # Load all datasets
 dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 6)]
+df_concat = pd.concat(dfs, axis=0)
 
 # Get target volumes (the last value of 'Vinj cum' from each file)
-target_volumes = [df['Tot Vol'].iloc[0] for df in dfs]
+target_volumes = [df['Vinj_cum'].iloc[-1] for df in dfs]
+
+# Accumulating volume as one big trip
+target_volumes_cum = []
+target_volumes_cum.append(target_volumes[0])
+for i in range(1,5):
+    target_volumes_cum.append(target_volumes_cum[i-1] + target_volumes[i])
+
+print(target_volumes)
+print(target_volumes_cum)
 
 # Initial guesses for Cd and Pint
 initial_guess = [0.7, 500]
@@ -46,14 +55,14 @@ initial_guess = [0.7, 500]
 bounds = [(0.3, 10), (10, 500)]
 
 # Print the initial objective value
-initial_objective_value = objective(initial_guess, dfs, target_volumes)
+initial_objective_value = objective(initial_guess, df_concat, target_volumes_cum)
 print(f"Initial objective value: {initial_objective_value}")
 
 # Perform optimization with tighter tolerances and callback for partial results
 result = minimize(
     objective, 
     initial_guess, 
-    args=(dfs, target_volumes), 
+    args=(df_concat, target_volumes), 
     bounds=bounds, 
     method='L-BFGS-B', 
     callback=callback, 

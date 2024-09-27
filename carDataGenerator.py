@@ -53,11 +53,11 @@ def carDataGen(num_rows, filename):
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000
     df['Vinj_cum'] = Vinj.cumsum()
 
-    df['Tot Vol'] =None
-    df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
+    #df['Tot Vol'] =None
+    #df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
 
     # Save to csv
-    df.to_csv(filename,float_format='%.5f', index=False)
+    df.to_csv(filename,float_format='%.10f', index=False)
 
 
 
