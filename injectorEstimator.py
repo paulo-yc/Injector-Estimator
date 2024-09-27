@@ -10,7 +10,7 @@ rho = 850
 def calculate_Vinj_cum(Cd, Pint, df):
 
     Pdif = df['Prail'] - Pint
-    Vinj = Cd * A * np.sqrt(2 * Pdif*100 / rho) * df['Tinj']/1000000
+    Vinj = Cd * A * np.sqrt(2 * Pdif*100000 / rho) * df['Tinj']/1000000
     df['Vinj cum'] = Vinj.cumsum()
     return df['Vinj cum'].iloc[-1]
 
@@ -89,17 +89,19 @@ def carDataGen_optimized(Cd,Pint,df):
     axs[1].grid(True)
 
     axs[1].set_title("Estimated")
-    axs[1].plot(df['RPM'])
-    axs[1].plot(df['Tinj'])
-    axs[1].plot(df['Prail'])
-    axs[1].plot(df['Vinj_cum'])
+    axs[1].plot(df['RPM'],label="RPM")
+    axs[1].plot(df['Tinj'],label="Tinj")
+    axs[1].plot(df['Prail'],label="Prail")
+    axs[1].plot(df['Vinj_cum'],label="Vinj_cum")
+    axs[1].legend()
 
     df2 = pd.read_csv("carData_1.csv")    
     axs[0].set_title("Experimental data (.csv)")
-    axs[0].plot(df2['RPM'])
-    axs[0].plot(df2['Tinj'])
-    axs[0].plot(df2['Prail'])
-    axs[0].plot(df2['Vinj_cum'])
+    axs[0].plot(df2['RPM'],label="RPM")
+    axs[0].plot(df2['Tinj'],label="Tinj")
+    axs[0].plot(df2['Prail'],label="Prail")
+    axs[0].plot(df2['Vinj_cum'],label="Vinj_cum")
+    axs[0].legend()
 
     plt.tight_layout()
     plt.show()

@@ -13,7 +13,7 @@ def changing_rpm(start_rpm, end_rpm, duration):
 # RPM values and intervals
 total_time = 600  # Total seconds
 intervals = [60, 120, 90, 150, 80, 100] 
-rpm_values = [1000, 2000, 1500, 2500, 1800, 2200] 
+rpm_values = [1000, 2000, 1500, 2500, 1800, 1000] 
 
 # RPM variation
 rpm_data = np.array([])
