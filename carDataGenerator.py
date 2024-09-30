@@ -51,6 +51,7 @@ def carDataGen(num_rows, filename):
     Pdif = df['Prail'] - Pint
 
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000
+    #Vinj = Cd * A  + (2*Pdif*100000 /rho) * df['Tinj']/1000000 #simple one
     df['Vinj_cum'] = Vinj.cumsum()
 
     #df['Tot Vol'] =None

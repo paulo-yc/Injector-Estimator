@@ -2,37 +2,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+from objectiveFun import calculate_Vinj_cum,objective,callback
 
 #Cd = 0.95
 #Pint = 40 #bar
 A = 0.000001
 rho = 850 #kg/m3
-
-# Function to calculate Vinj cum based on given Cd and Pint for a DataFrame
-def calculate_Vinj_cum(Cd, Pint, df):
-    Pdif = df['Prail'] - Pint
-    Vinj = Cd * A * np.sqrt(2 * Pdif*100000 / rho) * df['Tinj']/1000000
-    df['Vinj cum'] = Vinj.cumsum()    
-    return df['Vinj cum']
-
-# Objective function to minimize the difference for all datasets
-def objective(params, df, target_vols):
-    Cd, Pint = params
-    total_error = 0
-    
-    # Loop over all dataframes to calculate total error
-    for i in range(len(target_vols)):        
-        Vinj_cum_pred = calculate_Vinj_cum(Cd, Pint, df)
-        #print(f"i:{i} target_volumes_pos_cum[]:{target_volumes_pos_cum[i]} target_vols[]:{target_vols[i]} ")
-        total_error += (Vinj_cum_pred[target_volumes_pos_cum[i]] - target_vols[i]) ** 2  # Sum of squared errors
-        print(f"i:{i} total_error:{total_error}")
-
-    return total_error
-
-# Callback function to print partial results during optimization
-def callback(params):
-    Cd, Pint = params
-    print(f"Partial results - Cd: {Cd:.4f}, Pint: {Pint:.2f}")
+const = A, rho
 
 # Load all datasets
 dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 6)]
@@ -40,7 +16,8 @@ df_concat = pd.concat(dfs, axis=0,ignore_index=True)
 
 # Get target volumes (the last value of 'Vinj cum' from each file)
 target_volumes = [df['Vinj_cum'].iloc[-1] for df in dfs]
-target_volumes_pos = [len(df)-1 for df in dfs]
+target_volumes_pos = [len(df) for df in dfs]
+target_volumes_pos = [x-1 for x in target_volumes_pos]
 print("======Target Volumes and Positions")
 print(f"target_volumes:{target_volumes}")
 print(f"target_volumes_pos:{target_volumes_pos}")
@@ -71,22 +48,22 @@ print(f"Initial guess:{initial_guess}")
 bounds = [(0.0, 10), (0, 1000)]
 
 # Print the initial objective value
-initial_objective_value = objective(initial_guess, df_concat, target_volumes_cum)
+initial_objective_value = objective(initial_guess, const, df_concat,target_volumes_pos_cum, target_volumes_cum)
 print(f"Initial objective value: {initial_objective_value}")
 
 # Perform optimization with tighter tolerances and callback for partial results
 result = minimize(
     objective, 
     initial_guess, 
-    args=(df_concat, target_volumes_cum), 
+    args=(const, df_concat, target_volumes_pos_cum, target_volumes_cum), 
     bounds=bounds, 
     method='L-BFGS-B', 
     callback=callback, 
     options={
         'disp': True,           # Display the optimization process
         'maxiter': 1000,        # Maximum number of iterations
-        'ftol': 1e-60,          # Function tolerance for stopping
-        'gtol': 1e-60,          # Gradient tolerance for stopping
+        'ftol': 1e-9,          # Function tolerance for stopping
+        'gtol': 1e-9,          # Gradient tolerance for stopping
     }
 )
 
