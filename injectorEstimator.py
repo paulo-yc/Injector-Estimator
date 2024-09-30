@@ -12,8 +12,8 @@ rho = 850 #kg/m3
 def calculate_Vinj_cum(Cd, Pint, df):
     Pdif = df['Prail'] - Pint
     Vinj = Cd * A * np.sqrt(2 * Pdif*100000 / rho) * df['Tinj']/1000000
-    df['Vinj cum'] = Vinj.cumsum()
-    return df['Vinj cum'].iloc[-1]
+    df['Vinj cum'] = Vinj.cumsum()    
+    return df['Vinj cum']
 
 # Objective function to minimize the difference for all datasets
 def objective(params, df, target_vols):
@@ -21,10 +21,12 @@ def objective(params, df, target_vols):
     total_error = 0
     
     # Loop over all dataframes to calculate total error
-    for i in range(len(target_vols)):
+    for i in range(len(target_vols)):        
         Vinj_cum_pred = calculate_Vinj_cum(Cd, Pint, df)
-        total_error += (Vinj_cum_pred - target_vols[i]) ** 2  # Sum of squared errors
-    
+        #print(f"i:{i} target_volumes_pos_cum[]:{target_volumes_pos_cum[i]} target_vols[]:{target_vols[i]} ")
+        total_error += (Vinj_cum_pred[target_volumes_pos_cum[i]] - target_vols[i]) ** 2  # Sum of squared errors
+        print(f"i:{i} total_error:{total_error}")
+
     return total_error
 
 # Callback function to print partial results during optimization
@@ -34,10 +36,15 @@ def callback(params):
 
 # Load all datasets
 dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 6)]
-df_concat = pd.concat(dfs, axis=0)
+df_concat = pd.concat(dfs, axis=0,ignore_index=True)
 
 # Get target volumes (the last value of 'Vinj cum' from each file)
 target_volumes = [df['Vinj_cum'].iloc[-1] for df in dfs]
+target_volumes_pos = [len(df)-1 for df in dfs]
+print("======Target Volumes and Positions")
+print(f"target_volumes:{target_volumes}")
+print(f"target_volumes_pos:{target_volumes_pos}")
+print("\n")
 
 # Accumulating volume as one big trip
 target_volumes_cum = []
@@ -45,14 +52,23 @@ target_volumes_cum.append(target_volumes[0])
 for i in range(1,5):
     target_volumes_cum.append(target_volumes_cum[i-1] + target_volumes[i])
 
-print(target_volumes)
-print(target_volumes_cum)
+# Accumulating volume position as one big trip
+target_volumes_pos_cum = []
+target_volumes_pos_cum.append(target_volumes_pos[0])
+for i in range(1,5):
+    target_volumes_pos_cum.append(target_volumes_pos_cum[i-1] + target_volumes_pos[i])
+
+print("======Target Volumes and Positions (Accumulated)")
+print(f"target_volumes_cum:{target_volumes_cum}")
+print(f"target_volumes_pos_cum:{target_volumes_pos_cum}")
+print("\n")
 
 # Initial guesses for Cd and Pint
-initial_guess = [0.7, 500]
+initial_guess = [0.1, 500]
+print(f"Initial guess:{initial_guess}")
 
 # Bounds for Cd and Pint
-bounds = [(0.3, 10), (10, 500)]
+bounds = [(0.0, 10), (0, 1000)]
 
 # Print the initial objective value
 initial_objective_value = objective(initial_guess, df_concat, target_volumes_cum)
@@ -62,15 +78,15 @@ print(f"Initial objective value: {initial_objective_value}")
 result = minimize(
     objective, 
     initial_guess, 
-    args=(df_concat, target_volumes), 
+    args=(df_concat, target_volumes_cum), 
     bounds=bounds, 
     method='L-BFGS-B', 
     callback=callback, 
     options={
         'disp': True,           # Display the optimization process
         'maxiter': 1000,        # Maximum number of iterations
-        'ftol': 1e-20,          # Function tolerance for stopping
-        'gtol': 1e-12,          # Gradient tolerance for stopping
+        'ftol': 1e-60,          # Function tolerance for stopping
+        'gtol': 1e-60,          # Gradient tolerance for stopping
     }
 )
 
@@ -120,13 +136,6 @@ def carDataGen_estimated(Cd,Pint,df):
 
 
 carDataGen_estimated(Cd_opt,Pint_opt,dfs[0])
-carDataGen_estimated(Cd_opt,40,dfs[0])
-carDataGen_estimated(Cd_opt,400,dfs[0])
-carDataGen_estimated(Cd_opt,30,dfs[0])
-carDataGen_estimated(Cd_opt,0,dfs[0])
-# carDataGen_optimized(Cd_opt,Pint_opt,dfs[1])
-# carDataGen_optimized(Cd_opt,Pint_opt,dfs[2])
-# carDataGen_optimized(Cd_opt,Pint_opt,dfs[3])
-#carDataGen_optimized(0.47,60,dfs[0])
+carDataGen_estimated(Cd_opt,Pint_opt,dfs[4])
 
 

@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-Cd = 0.9
-Pint = 40 #bar
+Cd = 0.6
+Pint = 160 #bar
 
 A = 0.000001
 rho = 850 #kg/m3
@@ -17,7 +17,7 @@ def changing_rpm(start_rpm, end_rpm, duration):
     return np.linspace(start_rpm, end_rpm, duration)
 
 # RPM values and intervals
-time_scale = 1
+time_scale = 10
 intervals = np.array([60, 120, 90, 150, 80, 100, 50])
 intervals = intervals*time_scale
 rpm_values = [1000, 2000, 1500, 2500, 1800, 1300,1000] 
