@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-Cd = 0.6
-Pint = 160 #bar
+Cd = 0.8
+Pint = 130 #bar
 
 A = 0.000001
 rho = 850 #kg/m3

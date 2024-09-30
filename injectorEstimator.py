@@ -45,27 +45,41 @@ initial_guess = [0.1, 500]
 print(f"Initial guess:{initial_guess}")
 
 # Bounds for Cd and Pint
-bounds = [(0.0, 10), (0, 1000)]
+# bounds = [(0.0, 10), (0, 1000)]
 
 # Print the initial objective value
 initial_objective_value = objective(initial_guess, const, df_concat,target_volumes_pos_cum, target_volumes_cum)
 print(f"Initial objective value: {initial_objective_value}")
 
 # Perform optimization with tighter tolerances and callback for partial results
+# result = minimize(
+#     objective, 
+#     initial_guess, 
+#     args=(const, df_concat, target_volumes_pos_cum, target_volumes_cum), 
+#     bounds=bounds, 
+#     method='L-BFGS-B', 
+#     callback=callback, 
+#     options={
+#         'disp': True,           # Display the optimization process
+#         'maxiter': 1000,        # Maximum number of iterations
+#         'ftol': 1e-9,          # Function tolerance for stopping
+#         'gtol': 1e-9,          # Gradient tolerance for stopping
+#     }
+# )
+
 result = minimize(
     objective, 
     initial_guess, 
-    args=(const, df_concat, target_volumes_pos_cum, target_volumes_cum), 
-    bounds=bounds, 
-    method='L-BFGS-B', 
-    callback=callback, 
+    args=(const, df_concat, target_volumes_pos_cum, target_volumes_cum),  
+    method='Nelder-Mead', 
     options={
         'disp': True,           # Display the optimization process
         'maxiter': 1000,        # Maximum number of iterations
-        'ftol': 1e-9,          # Function tolerance for stopping
-        'gtol': 1e-9,          # Gradient tolerance for stopping
+        'ftol': 1e-10,          # Function tolerance for stopping
+        #'gtol': 1e-9,          # Gradient tolerance for stopping
     }
 )
+
 
 # Get the optimized Cd and Pint
 Cd_opt, Pint_opt = result.x

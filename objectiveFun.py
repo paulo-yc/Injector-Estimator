@@ -11,16 +11,34 @@ def calculate_Vinj_cum(const, Cd, Pint, df):
     return df['Vinj_cum']
 
 # Objective function to minimize the difference for all datasets
+# def objective(params, const, df, target_volsPos, target_vols):
+#     Cd, Pint = params
+#     A, rho = const
+#     total_error = 0
+    
+#     # Loop over all dataframes to calculate total error
+#     for i in range(len(target_vols)):        
+#         Vinj_cum_pred = calculate_Vinj_cum(const, Cd, Pint, df)
+#         total_error += (Vinj_cum_pred[target_volsPos[i]] - target_vols[i]) ** 2  # Sum of squared errors
+        
+#     print(f"total_error:{total_error}")
+
+#     return total_error
+
+# objective_with_penalty
 def objective(params, const, df, target_volsPos, target_vols):
     Cd, Pint = params
     A, rho = const
     total_error = 0
+
+    # Penalização para garantir que Pint está entre 0 e 1000
+    if Pint < 0 or Pint > 1000:
+        return 1e6  # Um valor grande que vai "punir" o otimizador
     
-    # Loop over all dataframes to calculate total error
-    for i in range(len(target_vols)):        
+    # Calcula o erro acumulado normalmente
+    for i in range(len(target_vols)):
         Vinj_cum_pred = calculate_Vinj_cum(const, Cd, Pint, df)
-        total_error += (Vinj_cum_pred[target_volsPos[i]] - target_vols[i]) ** 2  # Sum of squared errors
-        print(f"i:{i} total_error:{total_error}")
+        total_error += (Vinj_cum_pred[target_volsPos[i]] - target_vols[i]) ** 2
 
     return total_error
 
@@ -28,3 +46,6 @@ def objective(params, const, df, target_volsPos, target_vols):
 def callback(params):
     Cd, Pint = params
     print(f"Partial results - Cd: {Cd:.4f}, Pint: {Pint:.2f}")
+
+
+    
