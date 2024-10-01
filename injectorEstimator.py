@@ -10,8 +10,16 @@ A = 0.000001
 rho = 850 #kg/m3
 const = A, rho
 
+numTrips = 20
+
+
+# Initial guesses for Cd and Pint
+initial_guess = [0.94, 200]
+print(f"Initial guess:{initial_guess}")
+
+
 # Load all datasets
-dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(1, 6)]
+dfs = [pd.read_csv(f'carData_{i}.csv') for i in range(0, numTrips)]
 df_concat = pd.concat(dfs, axis=0,ignore_index=True)
 
 # Get target volumes (the last value of 'Vinj cum' from each file)
@@ -26,13 +34,13 @@ print("\n")
 # Accumulating volume as one big trip
 target_volumes_cum = []
 target_volumes_cum.append(target_volumes[0])
-for i in range(1,5):
+for i in range(1,numTrips):
     target_volumes_cum.append(target_volumes_cum[i-1] + target_volumes[i])
 
 # Accumulating volume position as one big trip
 target_volumes_pos_cum = []
 target_volumes_pos_cum.append(target_volumes_pos[0])
-for i in range(1,5):
+for i in range(1,numTrips):
     target_volumes_pos_cum.append(target_volumes_pos_cum[i-1] + target_volumes_pos[i])
 
 print("======Target Volumes and Positions (Accumulated)")
@@ -40,9 +48,7 @@ print(f"target_volumes_cum:{target_volumes_cum}")
 print(f"target_volumes_pos_cum:{target_volumes_pos_cum}")
 print("\n")
 
-# Initial guesses for Cd and Pint
-initial_guess = [0.1, 500]
-print(f"Initial guess:{initial_guess}")
+
 
 # Bounds for Cd and Pint
 # bounds = [(0.0, 10), (0, 1000)]
@@ -74,7 +80,7 @@ result = minimize(
     method='Nelder-Mead', 
     options={
         'disp': True,           # Display the optimization process
-        'maxiter': 1000,        # Maximum number of iterations
+        'maxiter': 100000,        # Maximum number of iterations
         'ftol': 1e-10,          # Function tolerance for stopping
         #'gtol': 1e-9,          # Gradient tolerance for stopping
     }
@@ -91,17 +97,15 @@ print(f"Optimized Cd: {Cd_opt:.4f}, Pint: {Pint_opt:.2f}")
 
 
 
-def carDataGen_estimated(Cd,Pint,df):
+def carDataGen_estimated(Cd,Pint,df,exp):
 
     #Estimated
     Pdif = df['Prail'] - Pint
     Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000
     df['Vinj_cum'] = Vinj.cumsum()
-    #df['Tot Vol'] =None
-    #df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
 
     #experimental
-    df2 = pd.read_csv("carData_1.csv") 
+    df2 = pd.read_csv(f"carData_{exp}.csv") 
 
     #plot comparison
     fig, axs = plt.subplots(2,1,figsize=(10,6))   
@@ -125,8 +129,7 @@ def carDataGen_estimated(Cd,Pint,df):
     plt.show()
 
 
-
-carDataGen_estimated(Cd_opt,Pint_opt,dfs[0])
-carDataGen_estimated(Cd_opt,Pint_opt,dfs[4])
+carDataGen_estimated(Cd_opt,Pint_opt,dfs[0],0)
+carDataGen_estimated(Cd_opt,Pint_opt,dfs[2],2)
 
 

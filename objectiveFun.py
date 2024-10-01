@@ -40,6 +40,8 @@ def objective(params, const, df, target_volsPos, target_vols):
         Vinj_cum_pred = calculate_Vinj_cum(const, Cd, Pint, df)
         total_error += (Vinj_cum_pred[target_volsPos[i]] - target_vols[i]) ** 2
 
+    print(f"total_error:{total_error}")
+
     return total_error
 
 # Callback function to print partial results during optimization

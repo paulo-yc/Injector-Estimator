@@ -4,11 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-Cd = 0.8
-Pint = 130 #bar
+Cd = 0.85
+Pint = 150 #bar
 
 A = 0.000001
 rho = 850 #kg/m3
+
+numTrips = 20
 
 def stable_rpm(rpm_value, duration):
     return np.full(duration, rpm_value)
@@ -61,12 +63,9 @@ def carDataGen(num_rows, filename):
     df.to_csv(filename,float_format='%.10f', index=False)
 
 
+for i in range(0,numTrips):
+    carDataGen(total_time,f"carData_{i}.csv")
 
-carDataGen(total_time,"carData_1.csv")
-carDataGen(total_time,"carData_2.csv")
-carDataGen(total_time,"carData_3.csv")
-carDataGen(total_time,"carData_4.csv")
-carDataGen(total_time,"carData_5.csv")
 
 
 
