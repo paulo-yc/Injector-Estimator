@@ -4,11 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-Cd = 0.85
-Pint = 150 #bar
+#diesel
+#Cd = 0.85
+#Pint = 150 #bar
+#A = 0.000001
+#rho = 850 #kg/m3
 
-A = 0.000001
-rho = 850 #kg/m3
+#Diesel
+class DieselData:
+    def __init__(self,Cd,A,rho,Pint):
+        self.Cd = Cd
+        self.A = A
+        self.rho = rho
+        self.Pint = Pint
+
+d = DieselData(Cd=0.95, A=0.000003, rho=850, Pint=150)
 
 numTrips = 20
 
@@ -44,20 +54,16 @@ def carDataGen(num_rows, filename):
     # Create DataFrame
     df = pd.DataFrame(data)
 
-    # Experience data
+    # Experimental data - Diesel
     df['TinjA'] = df['RPM']/1000 * np.random.randint(300, 500,size=num_rows)
     df['TinjB'] = df['RPM']/1000 * np.random.randint(500, 900,size=num_rows)
     df['Tinj'] = df['TinjA'] + df['TinjB'] # microsecond
     df['Prail'] = df['RPM'] * np.random.uniform(0.9, 1.1, size=num_rows)
-
-    Pdif = df['Prail'] - Pint
-
-    Vinj = Cd * A * np.sqrt(2*Pdif*100000 /rho) * df['Tinj']/1000000
-    #Vinj = Cd * A  + (2*Pdif*100000 /rho) * df['Tinj']/1000000 #simple one
+    Pdif = df['Prail'] - d.Pint
+    Vinj = d.Cd * d.A * np.sqrt(2*Pdif*100000 /d.rho) * df['Tinj']/1000000
     df['Vinj_cum'] = Vinj.cumsum()
 
-    #df['Tot Vol'] =None
-    #df.at[0,'Tot Vol'] = df['Vinj_cum'].iloc[-1]
+
 
     # Save to csv
     df.to_csv(filename,float_format='%.10f', index=False)
